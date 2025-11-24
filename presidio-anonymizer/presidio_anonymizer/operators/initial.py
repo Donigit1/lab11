@@ -2,31 +2,32 @@ from presidio_anonymizer.operators import Operator, OperatorType
 
 
 class Initial(Operator):
-    """Initial operator that converts names to initials."""
+    """Initial operator that converts names or multi-word identifiers into initials."""
 
     def operate(self, text: str, params=None):
         if not text or not isinstance(text, str):
             return text
 
-        # Remove extra whitespace and split words
         words = text.strip().split()
-
         initials = []
+
         for word in words:
-            # Get first alphanumeric character in the word
-            first_char = None
+            prefix = ""
+            first_alpha_num = None
+
+            # Detect prefix and first alphanumeric character
             for ch in word:
                 if ch.isalnum():
-                    first_char = ch.upper()
+                    first_alpha_num = ch.upper()
                     break
+                else:
+                    prefix += ch
 
-            # If no alphanumeric char found, skip
-            if not first_char:
-                continue
+            if not first_alpha_num:
+                continue  # Word has no alphanumeric chars
 
-            initials.append(f"{first_char}.")
+            initials.append(f"{prefix}{first_alpha_num}.")
 
-        # Join with space
         return " ".join(initials)
 
     def operator_name(self) -> str:
