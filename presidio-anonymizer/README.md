@@ -202,3 +202,69 @@ docker-compose up -d
 
 Follow the [API Spec](https://microsoft.github.io/presidio/api-docs/api-docs.html#tag/Anonymizer) for the
 Anonymizer REST API reference details
+
+
+
+
+
+
+
+
+
+
+
+
+For this part of the lab, I used the VS Code debugger to see how the code picks the right operator. I put a breakpoint on this line inside operators_factory.py:
+
+operator = operators_by_type.get(operator_name)
+
+
+This stopped the program right before it chose an operator so I could look at what was going on.
+
+Call Stack (screenshot in call-stack.png)
+
+When the code paused, I looked at the call stack. It showed the order of how the functions were called. It went something like:
+
+main
+ run_anonymizer
+ anonymize
+ _operate
+ _operate_on_text
+ create_operator_class
+
+
+I saved the screenshot as call-stack.png in the main folder of the project.
+
+How many if/elif?
+
+The factory doesn’t use a bunch of if/elif. It basically checks one thing:
+
+if it’s an anonlsymizer
+
+or if it’s a deanonymizer
+
+That’s it. No long chain of conditions.
+
+What data structure is used?
+
+It uses a dictionary to map operator names to their classes.
+Something like:
+
+{
+  "replace": Replace,
+  "mask": Mask,
+  "redact": Redact,
+  "initial": Initial
+}
+
+
+Then it just looks up the operator using .get(operator_name).
+
+How this shows the Strategy pattern
+
+Each operator (replace, mask, initial, etc.) has the same kind of function (operate).
+The engine doesn’t care which one it uses — it just grabs the one that matches the name.
+
+This means we can add new operators without changing the whole system.
+We just plug it in and it works.
+That’s pretty much what the Strategy pattern is about: swapping behavior at runtime based on what you pick.
